@@ -234,9 +234,11 @@ public class BluetoothPrinter extends CordovaPlugin {
                     Log.v(LOG_TAG, "DEVICE getName-> " + device.getName());
                     Log.v(LOG_TAG, "DEVICE getAddress-> " + device.getAddress());
                     Log.v(LOG_TAG, "DEVICE getType-> " + device.getType());
-                    json.put(device.getName());
-                    json.put(device.getAddress());
-                    json.put(device.getType());
+                    var dev = new JSONObject();
+                    dev.put("name", device.getName());
+                    dev.put("address", device.getAddress());
+                    dev.put("type", device.getType());
+                    json.put(dev);
                 }
                 callbackContext.success(json);
             } else {
