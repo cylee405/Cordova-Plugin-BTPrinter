@@ -86,8 +86,14 @@ public class BluetoothPrinter extends CordovaPlugin {
         } else if (action.equals("connect")) {
             String name = args.getString(0);
             String address = args.getString(1);
-            if(mmDevice != null)
-                disconnectBT(null);
+            if(mmDevice != null) {
+                try {
+                    disconnectBT(null);
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                    e.printStackTrace();
+                }
+            }
             if (findBT(callbackContext, name, address)) {
                 try {
                     connectBT(callbackContext);
