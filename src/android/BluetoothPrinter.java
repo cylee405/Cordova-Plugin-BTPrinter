@@ -86,6 +86,8 @@ public class BluetoothPrinter extends CordovaPlugin {
         } else if (action.equals("connect")) {
             String name = args.getString(0);
             String address = args.getString(1);
+            if(mmDevice != null)
+                disconnectBT(null);
             if (findBT(callbackContext, name, address)) {
                 try {
                     connectBT(callbackContext);
@@ -246,8 +248,6 @@ public class BluetoothPrinter extends CordovaPlugin {
     // This will find a bluetooth printer device
     boolean findBT(CallbackContext callbackContext, String name, String address) {
         try {
-            if(mmDevice != null)
-                disconnectBT();
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBluetoothAdapter == null) {
                 Log.e(LOG_TAG, "NO BLUETOOTH ADAPTER AVAILABLE");
