@@ -501,6 +501,7 @@ public class BluetoothPrinter extends CordovaPlugin {
     // disconnect bluetooth printer.
     boolean disconnectBT(CallbackContext callbackContext) throws IOException {
         try {
+            mmOutputStream.flush();
             stopWorker = true;
             mmOutputStream.close();
             mmInputStream.close();
