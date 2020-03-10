@@ -7,8 +7,8 @@ var BTPrinter = {
     list: function (fnSuccess, fnError) {
         exec(fnSuccess, fnError, "BluetoothPrinter", "list", []);
     },
-    connect: function (fnSuccess, fnError, name) {
-        exec(fnSuccess, fnError, "BluetoothPrinter", "connect", [name]);
+    connect: function (fnSuccess, fnError, name, address) {
+        exec(fnSuccess, fnError, "BluetoothPrinter", "connect", [name, address]);
     },
     disconnect: function (fnSuccess, fnError) {
         exec(fnSuccess, fnError, "BluetoothPrinter", "disconnect", []);
