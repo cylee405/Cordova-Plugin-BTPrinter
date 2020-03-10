@@ -43,9 +43,12 @@ BTPrinter.list(function(data){
 Return:
 
 ```
-data[0] Printer name
-data[1] Printer address
-data[2] Printer type
+list of device object.
+{
+    name: Printer name
+    address: Printer address
+    type: Printer type
+}
 ```
 
 ### Check Bluetooth status
@@ -69,7 +72,7 @@ BTPrinter.connect(function(data){
 },function(err){
 	console.log("Error");
 	console.log(err)
-}, "PrinterName");
+}, device);
 ```
 
 ### Disconnect printer
@@ -81,7 +84,7 @@ BTPrinter.disconnect(function(data){
 },function(err){
 	console.log("Error");
 	console.log(err)
-}, "PrinterName");
+});
 ```
 
 #### Obs:
