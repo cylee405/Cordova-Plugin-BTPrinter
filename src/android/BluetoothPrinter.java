@@ -85,7 +85,8 @@ public class BluetoothPrinter extends CordovaPlugin {
             return true;
         } else if (action.equals("connect")) {
             String name = args.getString(0);
-            if (findBT(callbackContext, name)) {
+            String address = args.getString(1);
+            if (findBT(callbackContext, name, address)) {
                 try {
                     connectBT(callbackContext);
                 } catch (IOException e) {
@@ -199,21 +200,21 @@ public class BluetoothPrinter extends CordovaPlugin {
 
     // This will return the array list of paired bluetooth printers
     void listBT(CallbackContext callbackContext) {
-        BluetoothAdapter mBluetoothAdapter = null;
+        BluetoothAdapter btAdapter = null;
         String errMsg = null;
         try {
-            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (mBluetoothAdapter == null) {
+            btAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (btAdapter == null) {
                 errMsg = "NO BLUETOOTH ADAPTER AVAILABLE";
                 Log.e(LOG_TAG, errMsg);
                 callbackContext.error(errMsg);
                 return;
             }
-            if (!mBluetoothAdapter.isEnabled()) {
+            if (!btAdapter.isEnabled()) {
                 Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 this.cordova.getActivity().startActivityForResult(enableBluetooth, 0);
             }
-            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+            Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
             if (pairedDevices.size() > 0) {
                 JSONArray json = new JSONArray();
                 for (BluetoothDevice device : pairedDevices) {
@@ -243,8 +244,10 @@ public class BluetoothPrinter extends CordovaPlugin {
     }
 
     // This will find a bluetooth printer device
-    boolean findBT(CallbackContext callbackContext, String name) {
+    boolean findBT(CallbackContext callbackContext, String name, String address) {
         try {
+            if(mmDevice != null)
+                disconnectBT();
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBluetoothAdapter == null) {
                 Log.e(LOG_TAG, "NO BLUETOOTH ADAPTER AVAILABLE");
@@ -256,7 +259,7 @@ public class BluetoothPrinter extends CordovaPlugin {
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
             if (pairedDevices.size() > 0) {
                 for (BluetoothDevice device : pairedDevices) {
-                    if (device.getName().equalsIgnoreCase(name)) {
+                    if (device.getName().equalsIgnoreCase(name) && device.getAddress().equalsIgnoreCase(address)) {
                         mmDevice = device;
                         return true;
                     }
@@ -506,13 +509,15 @@ public class BluetoothPrinter extends CordovaPlugin {
             mmOutputStream.close();
             mmInputStream.close();
             mmSocket.close();
-            callbackContext.success("BLUETOOTH DISCONNECT");
+            if(callbackContext != null)
+                callbackContext.success("BLUETOOTH DISCONNECT");
             return true;
         } catch (Exception e) {
             String errMsg = e.getMessage();
             Log.e(LOG_TAG, errMsg);
             e.printStackTrace();
-            callbackContext.error(errMsg);
+            if(callbackContext != null)
+                callbackContext.error(errMsg);
         }
         return false;
     }
