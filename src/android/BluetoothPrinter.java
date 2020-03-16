@@ -48,6 +48,8 @@ public class BluetoothPrinter extends CordovaPlugin {
     int counter;
     volatile boolean stopWorker;
     Bitmap bitmap;
+    String curName;
+    String curAddress;
 
     public static final byte LINE_FEED = 0x0A;
     public static final byte[] CODIFICATION = new byte[] { 0x1b, 0x4D, 0x01 };
@@ -84,8 +86,8 @@ public class BluetoothPrinter extends CordovaPlugin {
             listBT(callbackContext);
             return true;
         } else if (action.equals("connect")) {
-            String name = args.getString(0);
-            String address = args.getString(1);
+            curName = args.getString(0);
+            curAddress = args.getString(1);
             if(mmDevice != null) {
                 try {
                     disconnectBT(null);
@@ -94,7 +96,7 @@ public class BluetoothPrinter extends CordovaPlugin {
                     e.printStackTrace();
                 }
             }
-            if (findBT(callbackContext, name, address)) {
+            if (findBT(callbackContext, curName, curAddress)) {
                 try {
                     connectBT(callbackContext);
                 } catch (IOException e) {
@@ -102,7 +104,7 @@ public class BluetoothPrinter extends CordovaPlugin {
                     e.printStackTrace();
                 }
             } else {
-                callbackContext.error("BLUETOOTH DEVICE NOT FOUND: " + name);
+                callbackContext.error("BLUETOOTH DEVICE NOT FOUND: " + curName);
             }
             return true;
         } else if (action.equals("disconnect")) {
@@ -294,13 +296,15 @@ public class BluetoothPrinter extends CordovaPlugin {
             mmInputStream = mmSocket.getInputStream();
             beginListenForData();
             Log.d(LOG_TAG, "BLUETOOTH OPENED: " + mmDevice.getName());
-            callbackContext.success("BLUETOOTH OPENED: " + mmDevice.getName());
+            if(callbackContext != null)
+                callbackContext.success("BLUETOOTH OPENED: " + mmDevice.getName());
             return true;
         } catch (Exception e) {
             String errMsg = e.getMessage();
             Log.e(LOG_TAG, errMsg);
             e.printStackTrace();
-            callbackContext.error(errMsg);
+            if(callbackContext != null)
+                callbackContext.error(errMsg);
         }
         return false;
     }
@@ -355,6 +359,10 @@ public class BluetoothPrinter extends CordovaPlugin {
     // Print title formatted
     boolean printTitle(CallbackContext callbackContext, String msg, Integer size, Integer align) throws IOException {
         try {
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             byte[] new_size = selFontSize(size);
             byte[] new_align = selAlignTitle(align);
             mmOutputStream.write(new_size);
@@ -428,6 +436,10 @@ public class BluetoothPrinter extends CordovaPlugin {
 
     private void resetDefaultFontAlign() {
         try {
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             byte[] linefeed = new byte[] { 0x0A };
             byte[] char_padrao = new byte[] { 0x1B, 0x21, 0x00 };
             byte[] align_padrao = new byte[] { 0x1B, 0x61, 0x00 };
@@ -445,6 +457,10 @@ public class BluetoothPrinter extends CordovaPlugin {
 
     boolean printText(CallbackContext callbackContext, String msg) throws IOException {
         try {
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             // CANCEL CHINESE CHARACTER
             // mmOutputStream.write(0x1C);
             // mmOutputStream.write(0x2E);
@@ -474,6 +490,10 @@ public class BluetoothPrinter extends CordovaPlugin {
     boolean printTextSizeAlign(CallbackContext callbackContext, String msg, Integer size, Integer align)
             throws IOException {
         try {
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             // set unicode
             byte[] new_size = selFontSize(size);
             byte[] new_align = selAlignTitle(align);
@@ -495,6 +515,10 @@ public class BluetoothPrinter extends CordovaPlugin {
 
     boolean printPOSCommand(CallbackContext callbackContext, byte[] buffer) throws IOException {
         try {
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             mmOutputStream.write(buffer);
             // tell the user data were sent
             Log.d(LOG_TAG, "PRINT POS COMMAND SENT");
@@ -564,6 +588,10 @@ public class BluetoothPrinter extends CordovaPlugin {
     public void printLeftImage(byte[] msg) {
         try {
             Log.d(LOG_TAG, "PRINT LEFT IMAGE");
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             mmOutputStream.write(ESC_ALIGN_LEFT);
             mmOutputStream.write(msg);
         } catch (IOException e) {
@@ -576,6 +604,10 @@ public class BluetoothPrinter extends CordovaPlugin {
     public void printCenterImage(byte[] msg) {
         try {
             Log.d(LOG_TAG, "PRINT CENTER IMAGE");
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             mmOutputStream.write(ESC_ALIGN_CENTER);
             mmOutputStream.write(msg);
             // return to left position
@@ -590,6 +622,10 @@ public class BluetoothPrinter extends CordovaPlugin {
     public void printRightImage(byte[] msg) {
         try {
             Log.d(LOG_TAG, "PRINT RIGHT IMAGE");
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             mmOutputStream.write(ESC_ALIGN_RIGHT);
             mmOutputStream.write(msg);
             // return to left position
@@ -603,6 +639,10 @@ public class BluetoothPrinter extends CordovaPlugin {
     // This will send data to bluetooth printer
     boolean printBase64(CallbackContext callbackContext, String msg, Integer align) throws IOException {
         try {
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
 
             final String encodedString = msg;
             final String pureBase64Encoded = encodedString.substring(encodedString.indexOf(",") + 1);
@@ -650,6 +690,10 @@ public class BluetoothPrinter extends CordovaPlugin {
 
     boolean printQRCode(CallbackContext callbackContext, String str) throws IOException {
         try {
+            if(!mmSocket.isConnected()) {
+                disconnectBT(null);
+                connectBT(null);
+            }
             // In development
             mmOutputStream.write(str.getBytes());
             Log.d(LOG_TAG, "PRINT QRCODE SENT");
